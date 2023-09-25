@@ -93,7 +93,28 @@ public class PackagesController : Controller
             }
         }
     }
+    
+    private string NextUserPackageId =>
+        _userPackages.Count() == 0 ? "1" : (_userPackages.Max(x => Int32.Parse(x.Id)) + 1).ToString();
 
+    [HttpGet("GetNextProductId")]
+    public string GetNextProductId()
+    {
+        return NextUserPackageId;
+    }
+    
+    [HttpPost]
+    public IActionResult Post(UserPackage package)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        package.Id = GetNextProductId();
+        _userPackages.Add(package);
+        return CreatedAtAction(nameof(Get), new { id = package.Id }, package);
+    }
     public UserPackage _user_package;
 
 }
