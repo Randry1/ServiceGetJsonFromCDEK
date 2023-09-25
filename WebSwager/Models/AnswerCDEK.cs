@@ -3,7 +3,7 @@
 
 namespace WebSwager.Model;
 
-public class AnswerCost
+public class AnswerCDEK
 
 {
     public Result result { get; set; }

@@ -2,7 +2,7 @@
 
 namespace WebSwager.Model;
 
-public class Service
+public class ServiceCDEK
 {
     [Required]
     public string id { get; set; }

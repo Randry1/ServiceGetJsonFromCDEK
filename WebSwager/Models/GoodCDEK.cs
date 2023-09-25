@@ -2,7 +2,7 @@
 
 namespace WebSwager.Model;
 
-public class Good
+public class GoodCDEK
 {
     [Required]
     public string weight { get; set; }

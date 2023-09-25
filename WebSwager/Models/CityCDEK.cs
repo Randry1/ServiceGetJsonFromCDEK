@@ -3,7 +3,7 @@
 namespace WebSwager.Model;
 
 
-public class City
+public class CityCDEK
 {
     public string cityName { get; set; }
     public string cityCode { get; set; }

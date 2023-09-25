@@ -2,7 +2,7 @@
 
 namespace WebSwager.Model;
 
-public class Package
+public class PackageCDEK
 {
     [Required]
     public string dateExecute { get; set; }
@@ -15,8 +15,8 @@ public class Package
     [Required] public string tariffId { get; set; }
     
     [Required]
-    public Good[] goods { get; set; }
+    public GoodCDEK[] goods { get; set; }
     
     [Required]
-    public Service[] services { get; set; }
+    public ServiceCDEK[] services { get; set; }
 }

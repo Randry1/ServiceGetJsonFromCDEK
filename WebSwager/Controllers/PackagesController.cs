@@ -13,23 +13,23 @@ namespace WebSwager.Controllers;
 [Route("api/[controller]")]
 public class PackagesController : Controller
 {
-    private static List<Package> _packages = new List<Package>(
+    private static List<PackageCDEK> _packages = new List<PackageCDEK>(
         new []
         {
-            new Package() { dateExecute = "2023-09-28", senderCityId = "72", receiverCityId = "73", tariffId = "2", 
+            new PackageCDEK() { dateExecute = "2023-09-28", senderCityId = "72", receiverCityId = "73", tariffId = "2", 
                 goods = new []
                     {
-                        new Good(){weight = "0.3", length = "5", width = "20", height = "10"}
+                        new GoodCDEK(){weight = "0.3", length = "5", width = "20", height = "10"}
                     },
 
-                services = new [] { new Service() { id = "7" } }
+                services = new [] { new ServiceCDEK() { id = "7" } }
             }
             
         }
     );
 
     [HttpGet]
-    public IEnumerable<Package> Get() => _packages;
+    public IEnumerable<PackageCDEK> Get() => _packages;
 
 
     // [HttpGet("GetPriceJson")]
@@ -76,17 +76,22 @@ public class PackagesController : Controller
         return Ok();
     }
     
-    [HttpGet("ConvertCity")]
-    public City[] GetAllCity()
+    [HttpGet("GetAllCities")]
+    public IActionResult GetAllCities()
     {
         using (var client = new HttpClient())
         {
             var endpoint = new Uri("http://integration.cdek.ru/v1/location/cities/json?");
             var result = client.GetAsync(endpoint).Result;
             var json = result.Content.ReadAsStringAsync().Result;
-            var all_city = JsonConvert.DeserializeObject<City[]>(json);
-            
-            return all_city;
+            var all_city = JsonConvert.DeserializeObject<CityCDEK[]>(json);
+            if (all_city != null)
+            {
+            return Ok(all_city);
+            } else
+            {
+                return NotFound();
+            }
         }
     }
     
