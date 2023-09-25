@@ -77,31 +77,17 @@ public class PackagesController : Controller
     }
     
     [HttpGet("ConvertCity")]
-    public IActionResult ConvetPriceJson()
+    public City[] GetAllCity()
     {
         using (var client = new HttpClient())
         {
             var endpoint = new Uri("http://integration.cdek.ru/v1/location/cities/json?");
-            // var result = client.GetAsync(endpoint).Result.Content.ReadAsStringAsync().Result;
-            // Debug.WriteLine(result);
             var result = client.GetAsync(endpoint).Result;
             var json = result.Content.ReadAsStringAsync().Result;
             var all_city = JsonConvert.DeserializeObject<City[]>(json);
-            // Debug.WriteLine(tmp.Length.ToString());
-
-            if (all_city != null)
-            {
-                foreach (var item in all_city)
-                {
-                    if (item.fiasGuid == "d790c72e-479b-4da2-90d7-842b1712a71c")
-                    {
-                        Debug.WriteLine(item.fiasGuid + "\t" + item.cityCode + "\t" + item.cityName );
-                    }
-                }
-            }
+            
+            return all_city;
         }
-        
-        return Ok();
     }
     
 }
