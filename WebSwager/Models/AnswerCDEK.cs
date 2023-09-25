@@ -3,13 +3,8 @@
 
 namespace WebSwager.Model;
 
+
 public class AnswerCDEK
-
-{
-    public Result result { get; set; }
-}
-
-public class Result
 {
     public string price { get; set; }
     public int deliveryPeriodMin { get; set; }

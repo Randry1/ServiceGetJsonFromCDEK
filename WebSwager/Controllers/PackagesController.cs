@@ -61,18 +61,20 @@ public class PackagesController : Controller
     //     }
     // }
 
-    [HttpGet("GetCity")]
-    public IActionResult GetPriceJson()
+    [HttpGet("GetPriceJson")]
+    public IActionResult GetPrice()
     {
         using (var client = new HttpClient())
         {
-            var endpoint = new Uri("http://integration.cdek.ru/v1/location/cities/json?");
-            // var result = client.GetAsync(endpoint).Result.Content.ReadAsStringAsync().Result;
-            // Debug.WriteLine(result);
-            var result = client.GetAsync(endpoint).Result;
-            var json = result.Content.ReadAsStringAsync().Result;
+            var uri = new Uri("http://api.cdek.ru/calculator/calculate_price_by_json.php");
+            var new_package_CDEK = _packages.FirstOrDefault();
+            var new_package_CDEK_json = JsonConvert.SerializeObject(new_package_CDEK);
+            var request = new StringContent(new_package_CDEK_json, Encoding.UTF8, "application/json");
+            var response_CDEK = client.PostAsync(uri, request).Result;
+            var response_CDEK_string = response_CDEK.Content.ReadAsStringAsync().Result;
+            var answer_CDEK = JsonConvert.DeserializeObject<RootObject>(response_CDEK_string);
         }
-        
+
         return Ok();
     }
     

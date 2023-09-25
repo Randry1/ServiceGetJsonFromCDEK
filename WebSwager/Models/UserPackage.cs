@@ -2,7 +2,7 @@
 
 namespace WebSwager.Model;
 
-public class InputPackage
+public class UserPackage
 {
     [Required]
     public string fiasSenderCity { get; set; }
