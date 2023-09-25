@@ -4,6 +4,8 @@ namespace WebSwager.Model;
 
 public class UserPackage
 {
+    public string Id { get; set; }
+    
     [Required]
     public string fiasSenderCity { get; set; }
 

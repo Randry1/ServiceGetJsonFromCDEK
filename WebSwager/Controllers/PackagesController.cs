@@ -28,38 +28,34 @@ public class PackagesController : Controller
         }
     );
 
+    private static List<UserPackage> _userPackages = new List<UserPackage>(
+        new [] {
+            new UserPackage()
+            {
+                Id = "1",
+                fiasSenderCity = "52297f9a-df7f-4d97-9260-342aed1f0718",
+                fiasReceiverCity = "394a840f-9502-406f-a8be-3a2aa9e8f075",
+                weight = "500",
+                length = "500",
+                width = "500",
+                height = "500",
+            },
+            new UserPackage()
+            {
+                Id = "2",
+                fiasSenderCity = "4e503ad8-0372-4434-888c-f111ed78040c",
+                fiasReceiverCity = "394a840f-9502-406f-a8be-3a2aa9e8f075",
+                weight = "500",
+                length = "500",
+                width = "500",
+                height = "500",
+            }
+        }
+        );
+
     [HttpGet]
-    public IEnumerable<PackageCDEK> Get() => _packages;
-
-
-    // [HttpGet("GetPriceJson")]
-    // public IActionResult GetPriceJson(Package package)
-    // {
-    //     
-    //     var httpWebRequest = (HttpWebRequest)WebRequest.Create("http://api.cdek.ru/calculator/calculate_price_by_json.php");
-    //     httpWebRequest.ContentType = "application/json";
-    //     httpWebRequest.Method = "POST";
-    //
-    //     using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
-    //     {
-    //         Package tmp_packege = _packages.FirstOrDefault(p => p.dateExecute == "2023-09-28");
-    //         var jsonRequest =  JsonConvert.SerializeObject(tmp_packege);
-    //
-    //         string json = jsonRequest.ToString();
-    //         streamWriter.Write(json);
-    //     }
-    //
-    //     var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
-    //     using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
-    //     {
-    //         var result = streamReader.ReadToEnd();
-    //         var json_respond = JsonConvert.DeserializeObject(result);
-    //         
-    //         Debug.WriteLine( "\n\n\n\n\n"+ JsonConvert.SerializeObject(json_respond).ToString() + "\n\n\n\n\n");
-    //         
-    //         return Ok(new {Message = result});
-    //     }
-    // }
+    public IEnumerable<UserPackage> Get() => _userPackages;
+    
 
     [HttpGet("GetPriceJson")]
     public IActionResult GetPrice()
@@ -73,9 +69,10 @@ public class PackagesController : Controller
             var response_CDEK = client.PostAsync(uri, request).Result;
             var response_CDEK_string = response_CDEK.Content.ReadAsStringAsync().Result;
             var answer_CDEK = JsonConvert.DeserializeObject<RootObject>(response_CDEK_string);
+            
+            return Ok(answer_CDEK);
         }
 
-        return Ok();
     }
     
     [HttpGet("GetAllCities")]
@@ -96,5 +93,7 @@ public class PackagesController : Controller
             }
         }
     }
-    
+
+    public UserPackage _user_package;
+
 }
