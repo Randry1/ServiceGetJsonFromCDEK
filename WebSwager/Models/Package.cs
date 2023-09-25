@@ -15,8 +15,8 @@ public class Package
     [Required] public string tariffId { get; set; }
     
     [Required]
-    public List<Good> goods { get; set; }
+    public Good[] goods { get; set; }
     
     [Required]
-    public List<Service> services { get; set; }
+    public Service[] services { get; set; }
 }

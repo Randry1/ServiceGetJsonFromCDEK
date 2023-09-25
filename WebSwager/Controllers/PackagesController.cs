@@ -17,20 +17,12 @@ public class PackagesController : Controller
         new []
         {
             new Package() { dateExecute = "2023-09-28", senderCityId = "72", receiverCityId = "73", tariffId = "2", 
-                goods = new List<Good>(
-                    new []
+                goods = new []
                     {
                         new Good(){weight = "0.3", length = "5", width = "20", height = "10"}
-                    }),
+                    },
 
-                services = new List<Service>()
-                {
-                    new Service()
-                    {
-                        id = "7"
-                    }
-                }
-                    
+                services = new [] { new Service() { id = "7" } }
             }
             
         }
@@ -40,33 +32,76 @@ public class PackagesController : Controller
     public IEnumerable<Package> Get() => _packages;
 
 
-    [HttpGet("GetPriceJson")]
-    public IActionResult GetPriceJson(Package package)
+    // [HttpGet("GetPriceJson")]
+    // public IActionResult GetPriceJson(Package package)
+    // {
+    //     
+    //     var httpWebRequest = (HttpWebRequest)WebRequest.Create("http://api.cdek.ru/calculator/calculate_price_by_json.php");
+    //     httpWebRequest.ContentType = "application/json";
+    //     httpWebRequest.Method = "POST";
+    //
+    //     using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
+    //     {
+    //         Package tmp_packege = _packages.FirstOrDefault(p => p.dateExecute == "2023-09-28");
+    //         var jsonRequest =  JsonConvert.SerializeObject(tmp_packege);
+    //
+    //         string json = jsonRequest.ToString();
+    //         streamWriter.Write(json);
+    //     }
+    //
+    //     var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+    //     using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+    //     {
+    //         var result = streamReader.ReadToEnd();
+    //         var json_respond = JsonConvert.DeserializeObject(result);
+    //         
+    //         Debug.WriteLine( "\n\n\n\n\n"+ JsonConvert.SerializeObject(json_respond).ToString() + "\n\n\n\n\n");
+    //         
+    //         return Ok(new {Message = result});
+    //     }
+    // }
+
+    [HttpGet("GetCity")]
+    public IActionResult GetPriceJson()
     {
+        using (var client = new HttpClient())
+        {
+            var endpoint = new Uri("http://integration.cdek.ru/v1/location/cities/json?");
+            // var result = client.GetAsync(endpoint).Result.Content.ReadAsStringAsync().Result;
+            // Debug.WriteLine(result);
+            var result = client.GetAsync(endpoint).Result;
+            var json = result.Content.ReadAsStringAsync().Result;
+        }
         
-        var httpWebRequest = (HttpWebRequest)WebRequest.Create("http://api.cdek.ru/calculator/calculate_price_by_json.php");
-        httpWebRequest.ContentType = "application/json";
-        httpWebRequest.Method = "POST";
-
-        using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
+        return Ok();
+    }
+    
+    [HttpGet("ConvertCity")]
+    public IActionResult ConvetPriceJson()
+    {
+        using (var client = new HttpClient())
         {
-            Package tmp_packege = _packages.FirstOrDefault(p => p.dateExecute == "2023-09-28");
-            var jsonRequest =  JsonConvert.SerializeObject(tmp_packege);
+            var endpoint = new Uri("http://integration.cdek.ru/v1/location/cities/json?");
+            // var result = client.GetAsync(endpoint).Result.Content.ReadAsStringAsync().Result;
+            // Debug.WriteLine(result);
+            var result = client.GetAsync(endpoint).Result;
+            var json = result.Content.ReadAsStringAsync().Result;
+            var all_city = JsonConvert.DeserializeObject<City[]>(json);
+            // Debug.WriteLine(tmp.Length.ToString());
 
-            string json = jsonRequest.ToString();
-            streamWriter.Write(json);
+            if (all_city != null)
+            {
+                foreach (var item in all_city)
+                {
+                    if (item.fiasGuid == "d790c72e-479b-4da2-90d7-842b1712a71c")
+                    {
+                        Debug.WriteLine(item.fiasGuid + "\t" + item.cityCode + "\t" + item.cityName );
+                    }
+                }
+            }
         }
-
-        var httpResponse = (HttpWebResponse)httpWebRequest.GetResponse();
-        using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
-        {
-            var result = streamReader.ReadToEnd();
-            var json_respond = JsonConvert.DeserializeObject(result);
-            
-            Debug.WriteLine( "\n\n\n\n\n"+ JsonConvert.SerializeObject(json_respond).ToString() + "\n\n\n\n\n");
-            
-            return Ok(new {Message = result});
-        }
+        
+        return Ok();
     }
     
 }
