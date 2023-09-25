@@ -3,9 +3,9 @@ using Newtonsoft.Json;
 
 namespace WebSwager.Model;
 
-public class MainModel
+public class MainOrder
 {
-    public MainModel()
+    public MainOrder()
     {
         _cities = GetAllCities();
     }
