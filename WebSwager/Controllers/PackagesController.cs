@@ -55,7 +55,6 @@ public class PackagesController : Controller
         );
 
     public static CityCDEK[] _cities = InitAllCities();
-    public UserPackage _user_package;
     public PackageCDEK _package_Cdek = new PackageCDEK(){
         dateExecute = "2023-09-28", 
         senderCityId = "72", 
@@ -72,29 +71,28 @@ public class PackagesController : Controller
     public IEnumerable<UserPackage> Get() => _userPackages;
     
 
-    [HttpGet("GetPrice")]
-    public IActionResult GetPrice()
+    [HttpPost("GetPrice")]
+    public IActionResult GetPrice(UserPackage user_package)
     {
-        using (var client = new HttpClient())
+        if (!ModelState.IsValid)
         {
-            var uri = new Uri("http://api.cdek.ru/calculator/calculate_price_by_json.php");
-            var new_package_CDEK = _packages.FirstOrDefault();
-            var new_package_CDEK_json = JsonConvert.SerializeObject(new_package_CDEK);
-            var request = new StringContent(new_package_CDEK_json, Encoding.UTF8, "application/json");
-            var response_CDEK = client.PostAsync(uri, request).Result;
-            var response_CDEK_string = response_CDEK.Content.ReadAsStringAsync().Result;
-            var answer_CDEK = JsonConvert.DeserializeObject<AnswerCDEK>(response_CDEK_string);
-            Price price;
-            if (answer_CDEK.result.price != null)
-            {
-                price = new Price() { price = answer_CDEK.result.price };
-                return Ok(price);
-            }
-            else
-            {
-                return Ok(new { Error = "Невозможно доставить"});
-            }
-            
+            return BadRequest(ModelState);
+        }
+
+        user_package.Id = GetNextProductId();
+        _userPackages.Add(user_package);
+        _package_Cdek = ConvertUserPackageInCdek(user_package, _package_Cdek);
+        var answerCdek_sting = GetAnswerToCDEK(_package_Cdek);
+        var answer_CDEK = JsonConvert.DeserializeObject<AnswerCDEK>(answerCdek_sting);
+        Price price;
+        if (answer_CDEK.result != null)
+        {
+            price = new Price() { price = answer_CDEK.result.price };
+            return Ok(price);
+        }
+        else
+        {
+            return Ok(new { Error = "Невозможно доставить"});
         }
 
     }
@@ -141,20 +139,16 @@ public class PackagesController : Controller
     }
 
     [HttpPost("GetPriceJson")]
-    public IActionResult GetPriceJson(UserPackage package)
+    public IActionResult GetPriceJson(UserPackage user_package)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        package.Id = GetNextProductId();
-        _userPackages.Add(package);
-        _package_Cdek.dateExecute = GetDate();
-        _package_Cdek.senderCityId = GetCityCode(package.fiasSenderCity);
-        _package_Cdek.receiverCityId = GetCityCode(package.fiasReceiverCity);
-        _package_Cdek.goods[0] = new GoodCDEK() { weight = package.ConvertWeight(), length = package.ConvertLength(), height = package.ConvertHeight(), width = package.ConvertWidth() };
-        _package_Cdek.tariffId = "480";
+        user_package.Id = GetNextProductId();
+        _userPackages.Add(user_package);
+        _package_Cdek = ConvertUserPackageInCdek(user_package, _package_Cdek);
         var answerCdek_sting = GetAnswerToCDEK(_package_Cdek);
         var answer_CDEK = JsonConvert.DeserializeObject<AnswerCDEK>(answerCdek_sting);
         if (answer_CDEK != null)
@@ -169,17 +163,21 @@ public class PackagesController : Controller
     
     private string GetAnswerToCDEK(PackageCDEK new_package_CDEK)
     {
+        string result = "";
         using (var client = new HttpClient())
         {
             var uri = new Uri("http://api.cdek.ru/calculator/calculate_price_by_json.php");
             var new_package_CDEK_json = JsonConvert.SerializeObject(new_package_CDEK);
             var request = new StringContent(new_package_CDEK_json, Encoding.UTF8, "application/json");
-            var response_CDEK = client.PostAsync(uri, request).Result;
-            var response_CDEK_string = response_CDEK.Content.ReadAsStringAsync().Result;
-            
-            return response_CDEK_string;
+            var response_CDEK = client.PostAsync(uri, request);
+            if (response_CDEK.Result.IsSuccessStatusCode)
+            {
+                var response_CDEK_string = response_CDEK.Result.Content.ReadAsStringAsync().Result;
+                result =  response_CDEK_string;
+            }
         }
 
+        return result;
     }
     
     private static CityCDEK[] InitAllCities()
@@ -198,6 +196,7 @@ public class PackagesController : Controller
     private string GetCityCode(string fiasGuid)
     {
         string cityCode = "0";
+        
         if (_cities != null)
         {
             foreach (CityCDEK city in _cities)
@@ -219,6 +218,15 @@ public class PackagesController : Controller
     {
         return DateTime.Now.ToString("yyyy-MM-dd");
     }
-    
+
+    private PackageCDEK ConvertUserPackageInCdek(UserPackage user_package, PackageCDEK package_cdek)
+    {
+        _package_Cdek.dateExecute = GetDate();
+        _package_Cdek.senderCityId = GetCityCode(user_package.fiasSenderCity);
+        _package_Cdek.receiverCityId = GetCityCode(user_package.fiasReceiverCity);
+        _package_Cdek.goods[0] = new GoodCDEK() { weight = user_package.ConvertWeight(), length = user_package.ConvertLength(), height = user_package.ConvertHeight(), width = user_package.ConvertWidth() };
+        _package_Cdek.tariffId = "480";
+        return package_cdek;
+    }
 
 }
