@@ -1,12 +1,7 @@
-﻿using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using WebSwager.Model;
-using System.Net;
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using System.Text;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 
 namespace WebSwager.Controllers;
@@ -14,21 +9,7 @@ namespace WebSwager.Controllers;
 [Route("api/[controller]")]
 public class PackagesController : Controller
 {
-    private static List<PackageCDEK> _packages = new List<PackageCDEK>(
-        new []
-        {
-            new PackageCDEK() { dateExecute = "2023-09-28", senderCityId = "72", receiverCityId = "73", tariffId = "2", 
-                goods = new []
-                    {
-                        new GoodCDEK(){weight = "0.3", length = "5", width = "20", height = "10"}
-                    },
-
-                services = new [] { new ServiceCDEK() { id = "7" } }
-            }
-            
-        }
-    );
-
+    
     private static List<UserPackage> _userPackages = new List<UserPackage>(
         new [] {
             new UserPackage()
@@ -54,7 +35,7 @@ public class PackagesController : Controller
         }
         );
 
-    public static CityCDEK[] _cities = InitAllCities();
+    public static CityCDEK[] cities = InitAllCities();
     public PackageCDEK _package_Cdek = new PackageCDEK(){
         dateExecute = "2023-09-28", 
         senderCityId = "72", 
@@ -186,6 +167,10 @@ public class PackagesController : Controller
         {
             var endpoint = new Uri("http://integration.cdek.ru/v1/location/cities/json?");
             var result = client.GetAsync(endpoint).Result;
+            if (!result.IsSuccessStatusCode)
+            {
+                throw new Exception("Нет связи сервером СДЕК.");
+            }
             var json = result.Content.ReadAsStringAsync().Result;
             var all_cities = JsonConvert.DeserializeObject<CityCDEK[]>(json);
             
@@ -197,9 +182,9 @@ public class PackagesController : Controller
     {
         string cityCode = "0";
         
-        if (_cities != null)
+        if (cities != null)
         {
-            foreach (CityCDEK city in _cities)
+            foreach (CityCDEK city in cities)
             {
                 if (city.fiasGuid == fiasGuid)
                 {
@@ -209,7 +194,7 @@ public class PackagesController : Controller
         }
         else
         {
-            _cities = InitAllCities();
+            cities = InitAllCities();
         }
         return cityCode;
     }
