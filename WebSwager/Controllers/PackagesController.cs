@@ -53,11 +53,26 @@ public class PackagesController : Controller
         }
         );
 
+    public static CityCDEK[] _cities = InitAllCities();
+    public UserPackage _user_package;
+    public MainOrder _main_order = new MainOrder(){};
+    public PackageCDEK _package_Cdek = new PackageCDEK(){
+        dateExecute = "2023-09-28", 
+        senderCityId = "72", 
+        receiverCityId = "73", 
+        tariffId = "2", 
+        goods = new []
+        {
+            new GoodCDEK(){weight = "1", length = "1", width = "1", height = "1"}
+        }
+        
+    };
+    
     [HttpGet]
     public IEnumerable<UserPackage> Get() => _userPackages;
     
 
-    [HttpGet("GetPriceJson")]
+    [HttpGet("GetPrice")]
     public IActionResult GetPrice()
     {
         using (var client = new HttpClient())
@@ -68,7 +83,7 @@ public class PackagesController : Controller
             var request = new StringContent(new_package_CDEK_json, Encoding.UTF8, "application/json");
             var response_CDEK = client.PostAsync(uri, request).Result;
             var response_CDEK_string = response_CDEK.Content.ReadAsStringAsync().Result;
-            var answer_CDEK = JsonConvert.DeserializeObject<RootObject>(response_CDEK_string);
+            var answer_CDEK = JsonConvert.DeserializeObject<AnswerCDEK>(response_CDEK_string);
             
             return Ok(answer_CDEK);
         }
@@ -115,6 +130,82 @@ public class PackagesController : Controller
         _userPackages.Add(package);
         return CreatedAtAction(nameof(Get), new { id = package.Id }, package);
     }
-    public UserPackage _user_package;
+
+    [HttpPost("GetPriceJson")]
+    public IActionResult GetPrice(UserPackage package)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        package.Id = GetNextProductId();
+        _userPackages.Add(package);
+        _package_Cdek.dateExecute = "2023-10-24";
+        _package_Cdek.senderCityId = GetCityCode(package.fiasSenderCity);
+        _package_Cdek.receiverCityId = GetCityCode(package.fiasReceiverCity);
+        _package_Cdek.goods[0] = new GoodCDEK() { weight = package.ConvertWeight(), length = package.ConvertLength(), height = package.ConvertHeight(), width = package.ConvertWidth() };
+        _package_Cdek.tariffId = "480";
+        var answerCdek_sting = GetAnswerToCDEK(_package_Cdek);
+        var answer_CDEK = JsonConvert.DeserializeObject<AnswerCDEK>(answerCdek_sting);
+        if (answer_CDEK != null)
+        {
+            return Ok(answer_CDEK);
+        }
+        else
+        {
+            return Ok(new { Message = answerCdek_sting});
+        }
+    }
+    
+    private string GetAnswerToCDEK(PackageCDEK new_package_CDEK)
+    {
+        using (var client = new HttpClient())
+        {
+            var uri = new Uri("http://api.cdek.ru/calculator/calculate_price_by_json.php");
+            var new_package_CDEK_json = JsonConvert.SerializeObject(new_package_CDEK);
+            var request = new StringContent(new_package_CDEK_json, Encoding.UTF8, "application/json");
+            var response_CDEK = client.PostAsync(uri, request).Result;
+            var response_CDEK_string = response_CDEK.Content.ReadAsStringAsync().Result;
+            // var answer_CDEK = JsonConvert.DeserializeObject<AnswerCDEK>(response_CDEK_string);
+            
+            return response_CDEK_string;
+        }
+
+    }
+    
+    private static CityCDEK[] InitAllCities()
+    {
+        using (var client = new HttpClient())
+        {
+            var endpoint = new Uri("http://integration.cdek.ru/v1/location/cities/json?");
+            var result = client.GetAsync(endpoint).Result;
+            var json = result.Content.ReadAsStringAsync().Result;
+            var all_cities = JsonConvert.DeserializeObject<CityCDEK[]>(json);
+            
+            return all_cities;
+        }
+    }
+
+    private string GetCityCode(string fiasGuid)
+    {
+        string cityCode = "0";
+        if (_cities != null)
+        {
+            foreach (CityCDEK city in _cities)
+            {
+                if (city.fiasGuid == fiasGuid)
+                {
+                    cityCode = city.cityCode;
+                }
+            }
+        }
+        else
+        {
+            _cities = InitAllCities();
+        }
+        return cityCode;
+    }
+    
 
 }

@@ -1,0 +1,2 @@
+﻿
+```curl -X 'POST' 'https://localhost:7202/api/Packages/GetPrice?Id=23&fiasSenderCity=a9958004-d348-442e-ae0d-b09aca9fdf25&fiasReceiverCity=f2976e80-32e1-4284-8eda-06cf19239cd1&weight=3423&length=342&width=342&height=342' -H 'accept: */*' -d ''```

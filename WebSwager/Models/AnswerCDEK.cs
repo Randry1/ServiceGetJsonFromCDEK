@@ -1,7 +1,7 @@
 ﻿namespace WebSwager.Model;
 
 
-public class RootObject
+public class AnswerCDEK
 {
     public Result result { get; set; }
 }
