@@ -6,6 +6,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 
 namespace WebSwager.Controllers;
@@ -55,7 +56,6 @@ public class PackagesController : Controller
 
     public static CityCDEK[] _cities = InitAllCities();
     public UserPackage _user_package;
-    public MainOrder _main_order = new MainOrder(){};
     public PackageCDEK _package_Cdek = new PackageCDEK(){
         dateExecute = "2023-09-28", 
         senderCityId = "72", 
@@ -84,8 +84,17 @@ public class PackagesController : Controller
             var response_CDEK = client.PostAsync(uri, request).Result;
             var response_CDEK_string = response_CDEK.Content.ReadAsStringAsync().Result;
             var answer_CDEK = JsonConvert.DeserializeObject<AnswerCDEK>(response_CDEK_string);
+            Price price;
+            if (answer_CDEK.result.price != null)
+            {
+                price = new Price() { price = answer_CDEK.result.price };
+                return Ok(price);
+            }
+            else
+            {
+                return Ok(new { Error = "Невозможно доставить"});
+            }
             
-            return Ok(answer_CDEK);
         }
 
     }
@@ -132,7 +141,7 @@ public class PackagesController : Controller
     }
 
     [HttpPost("GetPriceJson")]
-    public IActionResult GetPrice(UserPackage package)
+    public IActionResult GetPriceJson(UserPackage package)
     {
         if (!ModelState.IsValid)
         {
@@ -141,7 +150,7 @@ public class PackagesController : Controller
 
         package.Id = GetNextProductId();
         _userPackages.Add(package);
-        _package_Cdek.dateExecute = "2023-10-24";
+        _package_Cdek.dateExecute = GetDate();
         _package_Cdek.senderCityId = GetCityCode(package.fiasSenderCity);
         _package_Cdek.receiverCityId = GetCityCode(package.fiasReceiverCity);
         _package_Cdek.goods[0] = new GoodCDEK() { weight = package.ConvertWeight(), length = package.ConvertLength(), height = package.ConvertHeight(), width = package.ConvertWidth() };
@@ -154,7 +163,7 @@ public class PackagesController : Controller
         }
         else
         {
-            return Ok(new { Message = answerCdek_sting});
+            return Ok(new { Error = answerCdek_sting});
         }
     }
     
@@ -167,7 +176,6 @@ public class PackagesController : Controller
             var request = new StringContent(new_package_CDEK_json, Encoding.UTF8, "application/json");
             var response_CDEK = client.PostAsync(uri, request).Result;
             var response_CDEK_string = response_CDEK.Content.ReadAsStringAsync().Result;
-            // var answer_CDEK = JsonConvert.DeserializeObject<AnswerCDEK>(response_CDEK_string);
             
             return response_CDEK_string;
         }
@@ -205,6 +213,11 @@ public class PackagesController : Controller
             _cities = InitAllCities();
         }
         return cityCode;
+    }
+
+    private string GetDate()
+    {
+        return DateTime.Now.ToString("yyyy-MM-dd");
     }
     
 
