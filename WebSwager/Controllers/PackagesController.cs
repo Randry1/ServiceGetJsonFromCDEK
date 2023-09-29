@@ -59,21 +59,17 @@ public class PackagesController : Controller
     [HttpGet("GetAllCities")]
     public IActionResult GetAllCities()
     {
-        using (var client = new HttpClient())
-        {
-            var endpoint = new Uri("http://integration.cdek.ru/v1/location/cities/json?");
-            var result = client.GetAsync(endpoint).Result;
-            var json = result.Content.ReadAsStringAsync().Result;
-            var allCity = JsonConvert.DeserializeObject<CityCDEK[]>(json);
+            CityCDEK[] allCity = UserPackage.InitAllCities();
             if (allCity != null)
             {
-            return Ok(allCity);
-            } else
+                return Ok(allCity);
+            } 
+            else
             {
                 return NotFound();
             }
-        }
     }
+    
     
     private string NextUserPackageId =>
         _userPackages.Count() == 0 ? "1" : (_userPackages.Max(x => Int32.Parse(x.Id)) + 1).ToString();

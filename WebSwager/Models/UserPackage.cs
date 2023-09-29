@@ -77,9 +77,9 @@ public class UserPackage
                 throw new Exception("Нет связи сервером СДЕК.");
             }
             var json = result.Content.ReadAsStringAsync().Result;
-            var all_cities = JsonConvert.DeserializeObject<CityCDEK[]>(json);
+            var allCities = JsonConvert.DeserializeObject<CityCDEK[]>(json);
 
-            return all_cities;
+            return allCities;
         }
     }
 
@@ -158,32 +158,4 @@ public class UserPackage
             return new Price() { price = "Невозможно доставить" };
         }
     }
-    
-    
-    /*
-[HttpPost("GetPrice")]
-public IActionResult GetPrice(UserPackage user_package)
-{
-    if (!ModelState.IsValid)
-    {
-        return BadRequest(ModelState);
-    }
-
-    user_package.Id = GetNextProductId();
-    _userPackages.Add(user_package);
-    _package_Cdek = ConvertUserPackageInCdek(user_package, _package_Cdek);
-    var answerCdek_sting = GetAnswerToCDEK(_package_Cdek);
-    var answer_CDEK = JsonConvert.DeserializeObject<AnswerCDEK>(answerCdek_sting);
-    Price price;
-    if (answer_CDEK.result != null)
-    {
-        price = new Price() { price = answer_CDEK.result.price };
-        return Ok(price);
-    }
-    else
-    {
-        return Ok(new { Error = "Невозможно доставить"});
-    }
-
-}*/
 }
