@@ -5,12 +5,12 @@ namespace WebSwager.Model;
 public class GoodCDEK
 {
     [Required]
-    public string weight { get; set; }
+    public string weight { get; set; }  = String.Empty;
     
     [Required]
-    public string length { get; set; }
+    public string length { get; set; }  = String.Empty;
 
-    [Required] public string width { get; set; }
+    [Required] public string width { get; set; }  = String.Empty;
     
-    [Required] public string height { get; set; }
+    [Required] public string height { get; set; }  = String.Empty;
 }

@@ -8,14 +8,14 @@ public class AnswerCDEK
 
 public class Result
 {
-    public string price { get; set; }
+    public string price { get; set; } = String.Empty;
     public int deliveryPeriodMin { get; set; }
     public int deliveryPeriodMax { get; set; }
-    public string deliveryDateMin { get; set; }
-    public string deliveryDateMax { get; set; }
+    public string deliveryDateMin { get; set; } = String.Empty;
+    public string deliveryDateMax { get; set; } = String.Empty;
     public int tariffId { get; set; }
     public double priceByCurrency { get; set; }
-    public string currency { get; set; }
+    public string currency { get; set; } = String.Empty;
     public int percentVAT { get; set; }
     public Services[] services { get; set; }
 }

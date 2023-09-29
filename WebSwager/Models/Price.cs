@@ -2,5 +2,5 @@
 
 public class Price
 {
-    public string price { get; set; }
+    public string price { get; set; } = String.Empty;
 }
