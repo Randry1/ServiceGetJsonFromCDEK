@@ -27,22 +27,22 @@ public class UserPackage
     [Required]
     public string height { get; set; }
 
-    public string ConvertWeight()
+    private string ConvertWeight()
     {
         return (float.Parse(weight, CultureInfo.InvariantCulture.NumberFormat) / 1000).ToString();
     }
     
-    public string ConvertLength()
+    private string ConvertLength()
     {
         return (float.Parse(length, CultureInfo.InvariantCulture.NumberFormat) / 10).ToString();
     }
     
-    public string ConvertWidth()
+    private string ConvertWidth()
     {
         return (float.Parse(weight, CultureInfo.InvariantCulture.NumberFormat) / 10).ToString();
     }
     
-    public string ConvertHeight()
+    private string ConvertHeight()
     {
         return (float.Parse(height, CultureInfo.InvariantCulture.NumberFormat) / 10).ToString();
     }
